@@ -9,6 +9,8 @@ import UniHealthEnhanced from "./pages/HomePage";
 import AccessControlPage from "./pages/patient/ConsentPage";
 import MedicalRecordsPage from "./pages/patient/MedicalRecordPage";
 import ActivityLogPage from "./pages/patient/ActivityLog";
+import LoginPage from "./pages/auth/LoginPage";
+import VerifyEmail from "./pages/auth/VerifyEmail";
 
 const App = () => {
   return (
@@ -17,6 +19,10 @@ const App = () => {
         <Routes>
           {/* Home route */}
           <Route path="/" element={<UniHealthEnhanced />} />
+
+          {/* Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/verify-email" element={<VerifyEmail />} />
 
           {/* Patient Routes */}
           <Route path="/patient" element={<PatientLayout />}>

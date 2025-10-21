@@ -1,32 +1,7 @@
 @import "tailwindcss";
 
-.psmall {
-    font-size: 12px;
-}
-
-.pmedium {
-    font-size: 16px;
-}
-
-.plarge{
-    font-size: 18px;
-}
-
-.header1 {
-    font-size: 60px;
-    font-weight: 600;
-}
-
-.header2 {
-    font-size: 48px;
-    font-weight: 600;
-}
-
-.header3 {
-    font-size: 36px;
-    font-weight: 400;
-}
-
-.subheader {
-    font-size: 24px;
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-family: 'Inter', sans-serif;
 }
