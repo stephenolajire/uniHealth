@@ -1,4 +1,3 @@
-import Navigation from "../components/common/nav/Navigation";
 import Hero from "../components/landing/Hero";
 import Stat from "../components/landing/Stat";
 import About from "../components/landing/About";
@@ -6,7 +5,7 @@ import Services from "../components/landing/OurService";
 import HowItWorks from "../components/landing/HowItWorks";
 import Contact from "../components/landing/Contact";
 import Newsletter from "../components/landing/NewsLetter";
-import Footer from "../components/common/nav/Footer";
+
 
 export default function UniHealthEnhanced() {
   // const getUserLocation = () => {
@@ -28,8 +27,7 @@ export default function UniHealthEnhanced() {
   // };
 
   return (
-    <main className="min-h-screen mt-25">
-      <Navigation />
+    <main className="min-h-screen ">
       <section>
         <Hero />
       </section>
@@ -58,9 +56,6 @@ export default function UniHealthEnhanced() {
       </section>
       <section id="newsletter" className="relative bg-white overflow-hidden">
         <Newsletter />
-      </section>
-      <section>
-        <Footer />
       </section>
     </main>
   );

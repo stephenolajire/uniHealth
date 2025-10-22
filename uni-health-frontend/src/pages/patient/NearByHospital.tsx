@@ -6,7 +6,6 @@ import {
   Building2,
   Star,
   Upload,
-  Map as MapIcon,
   Navigation,
   User,
   FileText,
@@ -18,6 +17,9 @@ import {
   Stethoscope,
   Brain,
 } from "lucide-react";
+import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
+import "leaflet/dist/leaflet.css";
+import L from "leaflet";
 
 interface Hospital {
   id: number;
@@ -108,7 +110,7 @@ const NearbyHospitalsBooking = () => {
     { id: 3, name: "Orthopedics", doctorCount: 6, icon: Bone },
     { id: 4, name: "General Medicine", doctorCount: 10, icon: Stethoscope },
     { id: 5, name: "Dermatology", doctorCount: 4, icon: Smile },
-    { id: 6, name: "Neurology", doctorCount: 5, icon: Brain},
+    { id: 6, name: "Neurology", doctorCount: 5, icon: Brain },
   ];
 
   const mockDoctors: DoctorsMap = {
@@ -405,6 +407,64 @@ const NearbyHospitalsBooking = () => {
     </div>
   );
 
+  const hospitalIcon = new L.Icon({
+    iconUrl: "/hospital-icon.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+
+  const userIcon = new L.Icon({
+    iconUrl: "/user-location-icon.png",
+    iconSize: [32, 32],
+    iconAnchor: [16, 32],
+    popupAnchor: [0, -32],
+  });
+
+  const MapView = ({
+    hospitals,
+    selectedHospital,
+    onHospitalSelect,
+  }: {
+    hospitals: Hospital[];
+    selectedHospital: Hospital | null;
+    onHospitalSelect: (hospital: Hospital) => void;
+  }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      if (selectedHospital) {
+        map.setView(
+          [selectedHospital.coordinates.lat, selectedHospital.coordinates.lng],
+          15
+        );
+      }
+    }, [selectedHospital, map]);
+
+    return (
+      <>
+        {hospitals.map((hospital) => (
+          <Marker
+            key={hospital.id}
+            position={[hospital.coordinates.lat, hospital.coordinates.lng]}
+            icon={hospitalIcon}
+            eventHandlers={{
+              click: () => onHospitalSelect(hospital),
+            }}
+          >
+            <Popup>
+              <div className="p-2">
+                <h3 className="font-semibold">{hospital.name}</h3>
+                <p className="text-sm">{hospital.address}</p>
+                <p className="text-sm text-blue-600">{hospital.distance}</p>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
+      </>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {showBackConfirmation && <BackConfirmationDialog />}
@@ -493,99 +553,112 @@ const NearbyHospitalsBooking = () => {
                 )}
               </div>
 
-              {/* Map Placeholder */}
-              <div className="bg-gradient-to-br from-blue-100 to-green-100 rounded-lg h-80 mb-6 flex items-center justify-center relative overflow-hidden">
-                <MapIcon className="w-16 h-16 text-blue-300 absolute" />
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center z-10">
-                    <p className="text-gray-700 font-semibold text-lg mb-2">
-                      Map View
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      {locationLoading
-                        ? "Getting your location..."
-                        : "Showing hospitals near you"}
-                    </p>
+              <div className="flex flex-col lg:flex-row gap-6">
+                {/* Map */}
+                <div className="lg:w-3/5">
+                  <div className="bg-white rounded-lg shadow-sm h-[600px] overflow-hidden">
+                    {userLocation && (
+                      <MapContainer
+                        center={[userLocation.lat, userLocation.lng]}
+                        zoom={13}
+                        className="w-full h-full"
+                      >
+                        <TileLayer
+                          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                        />
+
+                        {/* User Location Marker */}
+                        <Marker
+                          position={[userLocation.lat, userLocation.lng]}
+                          icon={userIcon}
+                        >
+                          <Popup>You are here</Popup>
+                        </Marker>
+
+                        <MapView
+                          hospitals={nearbyHospitals}
+                          selectedHospital={selectedHospital}
+                          onHospitalSelect={handleHospitalSelect}
+                        />
+                      </MapContainer>
+                    )}
                   </div>
                 </div>
 
-                {/* Map Markers Simulation */}
-                {!locationLoading &&
-                  nearbyHospitals.map((hospital, index) => (
-                    <div
-                      key={hospital.id}
-                      className="absolute w-10 h-10 bg-red-500 rounded-full border-4 border-white shadow-lg flex items-center justify-center text-white text-sm font-bold animate-pulse"
-                      style={{
-                        left: `${20 + index * 18}%`,
-                        top: `${30 + (index % 2) * 25}%`,
-                      }}
-                    >
-                      {index + 1}
-                    </div>
-                  ))}
-              </div>
-
-              {/* Hospital List */}
-              <div className="space-y-4">
-                <h3 className="font-semibold text-gray-900 mb-4">
-                  {nearbyHospitals.length} Hospitals Found
-                </h3>
-
-                {nearbyHospitals.map((hospital, index) => (
-                  <div
-                    key={hospital.id}
-                    onClick={() => handleHospitalSelect(hospital)}
-                    className="border-2 border-gray-200 rounded-lg p-5 cursor-pointer hover:border-blue-500 hover:bg-blue-50 transition-all"
-                  >
-                    <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
-                        {index + 1}
-                      </div>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between mb-2">
-                          <div>
-                            <h3 className="font-semibold text-gray-900 text-lg">
-                              {hospital.name}
-                            </h3>
-                            <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
-                              <MapPin className="w-4 h-4" />
-                              {hospital.address}
-                            </p>
-                          </div>
-                          <span className="text-sm font-medium text-blue-600">
-                            {hospital.distance}
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-1 mb-3">
-                          <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
-                          <span className="font-medium text-sm">
-                            {hospital.rating}
-                          </span>
-                          <span className="text-sm text-gray-600">
-                            ({hospital.reviews} reviews)
-                          </span>
-                        </div>
-
-                        <div className="flex items-center gap-2 flex-wrap">
-                          {hospital.departments.slice(0, 3).map((dept) => (
-                            <span
-                              key={dept}
-                              className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
-                            >
-                              {dept}
-                            </span>
-                          ))}
-                          {hospital.departments.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
-                              +{hospital.departments.length - 3} more
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
+                {/* Hospital List */}
+                <div className="lg:w-2/5 space-y-4">
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 className="font-semibold text-gray-900">
+                      {nearbyHospitals.length} Hospitals Found
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      Select a hospital to continue
+                    </p>
                   </div>
-                ))}
+
+                  <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
+                    {nearbyHospitals.map((hospital, index) => (
+                      <div
+                        key={hospital.id}
+                        onClick={() => handleHospitalSelect(hospital)}
+                        className={`border-2 rounded-lg p-5 cursor-pointer transition-all ${
+                          selectedHospital?.id === hospital.id
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-blue-500 hover:bg-blue-50"
+                        }`}
+                      >
+                        <div className="flex items-start gap-4">
+                          <div className="w-12 h-12 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-lg flex-shrink-0">
+                            {index + 1}
+                          </div>
+                          <div className="flex-1">
+                            <div className="flex items-start justify-between mb-2">
+                              <div>
+                                <h3 className="font-semibold text-gray-900 text-lg">
+                                  {hospital.name}
+                                </h3>
+                                <p className="text-sm text-gray-600 flex items-center gap-1 mt-1">
+                                  <MapPin className="w-4 h-4" />
+                                  {hospital.address}
+                                </p>
+                              </div>
+                              <span className="text-sm font-medium text-blue-600">
+                                {hospital.distance}
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-1 mb-3">
+                              <Star className="w-4 h-4 text-yellow-500 fill-yellow-500" />
+                              <span className="font-medium text-sm">
+                                {hospital.rating}
+                              </span>
+                              <span className="text-sm text-gray-600">
+                                ({hospital.reviews} reviews)
+                              </span>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {hospital.departments.slice(0, 3).map((dept) => (
+                                <span
+                                  key={dept}
+                                  className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                                >
+                                  {dept}
+                                </span>
+                              ))}
+                              {hospital.departments.length > 3 && (
+                                <span className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">
+                                  +{hospital.departments.length - 3} more
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             </div>
           )}

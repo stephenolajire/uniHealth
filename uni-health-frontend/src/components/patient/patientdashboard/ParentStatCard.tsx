@@ -18,7 +18,7 @@ const ParentStatCard = () => {
   const [selectedYear, setSelectedYear] = useState(2025);
   return (
     <div>
-      <div className="bg-gradient-to-r from-blue-600 to-green-600 text-white shadow-lg mb-7">
+      <div className="bg-blue-700 text-white shadow-lg mb-7">
         <div className="w-full mx-auto px-6 py-6">
           <div className="flex items-center justify-between">
             <div>

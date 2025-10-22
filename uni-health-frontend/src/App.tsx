@@ -11,6 +11,8 @@ import MedicalRecordsPage from "./pages/patient/MedicalRecordPage";
 import ActivityLogPage from "./pages/patient/ActivityLog";
 import LoginPage from "./pages/auth/LoginPage";
 import VerifyEmail from "./pages/auth/VerifyEmail";
+import FindNearby from "./pages/FindNearby";
+import MainLayout from "./components/layout/mainlayout/MainLayout";
 
 const App = () => {
   return (
@@ -18,7 +20,11 @@ const App = () => {
       <Router>
         <Routes>
           {/* Home route */}
-          <Route path="/" element={<UniHealthEnhanced />} />
+          <Route path="/" element={<MainLayout />}>
+            <Route index element={<UniHealthEnhanced />} />
+            <Route path="find-a-provider" element={<FindNearby />} />
+          </Route>
+        
 
           {/* Auth Routes */}
           <Route path="/login" element={<LoginPage />} />
